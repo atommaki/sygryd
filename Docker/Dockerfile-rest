@@ -1,0 +1,16 @@
+FROM sygryd-base:latest
+
+COPY src/sygryd-rest.py /app
+
+#CMD ["python", "sygryd-rest.py"] # <- run it without gunicorn
+
+CMD [ \
+  "gunicorn", \
+  "-w", "4", \
+  "-b", "0.0.0.0:5000", \
+  "--access-logfile", "-", \
+  "--access-logformat", "%(h)s %(l)s %(t)s \"%(r)s\" %(s)s %(b)s %(L)ss \"%(f)s\" \"%(a)s\"", \
+  "--error-logfile", "-", \
+  "sygryd-rest:app" \
+]
+

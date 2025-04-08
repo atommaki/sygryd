@@ -1,0 +1,8 @@
+Flask
+flask-restx
+SQLAlchemy
+psycopg2-binary
+python-dotenv
+PyYAML
+gunicorn
+docker

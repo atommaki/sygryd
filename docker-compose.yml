@@ -1,0 +1,56 @@
+services:
+
+  sygryd-base:
+    # this is not a service, it's here only to build docker base image for others
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile-base
+    image: sygryd-base
+    profiles:
+      - build-only
+
+  sygryd-rest:
+    container_name: sygryd-rest
+    hostname:       sygryd-rest
+    restart:        always
+    env_file:       ".env"
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile-rest
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    volumes:
+      - ./sygryd-config.yml:/app/sygryd-config.yml
+      - /etc/localtime:/etc/localtime:ro
+
+  sygryd-backend:
+    container_name: sygryd-backend
+    hostname:       sygryd-backend
+    restart:        always
+    env_file:       ".env"
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile-backend
+    depends_on:
+      - postgres
+    volumes:
+      - ./sygryd-config.yml:/app/sygryd-config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+
+  postgres:
+    image: postgres:latest
+    container_name: sygryd-postgres
+    hostname:       sygryd-postgres
+    restart:        always
+    env_file:       ".env"
+    ports:
+      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
+    command: "-p ${POSTGRES_PORT:-5432}"
+    volumes:
+        - ./postgres-data:/var/lib/postgresql/data
+        - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+        - /etc/localtime:/etc/localtime:ro
+
